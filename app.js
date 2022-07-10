@@ -1,10 +1,9 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const port = 8080;
-require('dotenv').config() // adding dotenv functionality
+require("dotenv").config(); // adding dotenv functionality
 
-
-const mariadb = require('mariadb');
+const mariadb = require("mariadb");
 console.log(process.env.DB_HOST);
 console.log(process.env.DB_USER);
 console.log(process.env.DB_NAME);
@@ -38,23 +37,32 @@ pool.getConnection()
     });
 */
 
-mariadb.createConnection({host: process.env.DB_HOST, user: process.env.DB_USER, password: process.env.DB_PASSWORD})
-  .then(conn => {
-    conn.query("select 1", [2])
-      .then(rows => {
-        console.log(rows); // [{ "1": 1 }]
-        conn.end();
-      })
-      .catch(err => { 
-        //handle query error
-      });
-  })
-  .catch(err => {
-    //handle connection error
-    console.log(err);
-  });
+const pool = mariadb.createPool({ host: process.env.DB_HOST, user: process.env.DB_USER, database: process.env.DB_NAME, password: process.env.DB_PASSWORD });
 
-app.get('/', (req, res) => {
-    res.send('Hello World, from express. My solution: ' + process.env.SECRET_MESSAGE);
+pool.getConnection((err, connection) => {
+    if (err) {
+        if (err.code === "PROTOCOL_CONNECTION_LOST") {
+            console.log("Database connection lost");
+        }
+        if (err.code === "ER_CON_COUNT_ERROR") {
+            console.error("Database has too many connection");
+        }
+        if (err.code === "ECONNREFUSED") {
+            console.error("Database connection was refused");
+        }
+    }
+    if (connection) connection.release();
+
+    return;
 });
-app.listen(port, () => console.log(`Hello world app listening on port ${port}!`))
+
+app.get("/", async (req, res) => {
+  try {
+    const sqlQuery = "SELECT kursName, id FROM mytable";
+    const rows = await pool.query(sqlQuery);
+    res.status(200).json(rows);
+  } catch(err) {
+    res.status(400).send(err.message);
+  }
+});
+app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
