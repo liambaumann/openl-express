@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js localhost:8080"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +15,8 @@
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "mariadb": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
   }
 }

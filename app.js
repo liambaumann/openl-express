@@ -65,4 +65,27 @@ app.get("/", async (req, res) => {
     res.status(400).send(err.message);
   }
 });
+
+
+app.get('/courses', async (req, res) => {
+  try {
+    const sqlQuery = "SELECT kursName, kursKuerzel, id FROM mytable";
+    const rows = await pool.query(sqlQuery);
+    res.status(200).json(rows);
+  } catch(err) {
+    res.status(400).send(err.message);
+  }
+});
+
+app.get('/course?:id', async (req, res) => {
+  const id = req.query.id;
+  try {
+    const sqlQuery = "SELECT kursName, kursKuerzel, id FROM mytable WHERE id=?";
+    const rows = await pool.query(sqlQuery, [id]);
+    res.status(200).json(rows);
+  } catch(err) {
+    res.status(400).send(err.message);
+  }
+});
+
 app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
