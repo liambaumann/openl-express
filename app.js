@@ -57,34 +57,59 @@ pool.getConnection((err, connection) => {
 });
 
 app.get("/", async (req, res) => {
-  try {
-    const sqlQuery = "SELECT kursName, id FROM mytable";
-    const rows = await pool.query(sqlQuery);
-    res.status(200).json(rows);
-  } catch(err) {
-    res.status(400).send(err.message);
-  }
+    try {
+        const sqlQuery = "SELECT cName, cCode, cId FROM courses";
+        const rows = await pool.query(sqlQuery);
+        res.status(200).json(rows);
+    } catch (err) {
+        res.status(400).send(err.message);
+    }
 });
 
-
-app.get('/courses', async (req, res) => {
-  try {
-    const sqlQuery = "SELECT kursName, kursKuerzel, id FROM mytable";
-    const rows = await pool.query(sqlQuery);
-    res.status(200).json(rows);
-  } catch(err) {
-    res.status(400).send(err.message);
-  }
-});
-
-app.get('/course?:id', async (req, res) => {
-  const id = req.query.id;
-  try {
-    const sqlQuery = "SELECT kursName, kursKuerzel, id FROM mytable WHERE id=?";
-    const rows = await pool.query(sqlQuery, [id]);
-    res.status(200).json(rows);
-  } catch(err) {
-    res.status(400).send(err.message);
+app.get("/courses", async (req, res) => {
+    const id = req.query.id;
+    const code = req.query.code;
+    if (typeof id === "undefined" && typeof code === "undefined") {
+        try {
+            const sqlQuery = "SELECT cName, cCode, cId FROM courses";
+            const rows = await pool.query(sqlQuery);
+            res.status(200).json(rows);
+            return;
+        } catch (err) {
+            res.status(400).send(err.message);
+        }
+    }
+    console.log(typeof id);
+    console.log(typeof code);
+    if (typeof id !== "undefined" && typeof code !== "undefined") {
+        try {
+            const sqlQuery = "SELECT cName, cCode, cId FROM courses WHERE cId=? AND cCode=?";
+            const rows = await pool.query(sqlQuery, [id, code]);
+            res.status(200).json(rows);
+            return;
+        } catch (err) {
+            res.status(400).send(err.message);
+        }
+    }
+    if (typeof id !== "undefined") {
+        try {
+            const sqlQuery = "SELECT cName, cCode, cId FROM courses WHERE cId=?";
+            const rows = await pool.query(sqlQuery, [id]);
+            res.status(200).json(rows);
+            return;
+        } catch (err) {
+            res.status(400).send(err.message);
+        }
+    }
+    if (typeof code !== "undefined") {
+      try {
+          const sqlQuery = "SELECT cName, cCode, cId FROM courses WHERE cCode=?";
+          const rows = await pool.query(sqlQuery, [code]);
+          res.status(200).json(rows);
+          return;
+      } catch (err) {
+          res.status(400).send(err.message);
+      }
   }
 });
 
